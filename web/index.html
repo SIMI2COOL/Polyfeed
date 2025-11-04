@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Polyfeed</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Liquid gradient background and blobs -->
+    <div class="bg"></div>
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+    <div class="noise"></div>
+
+    <header class="shell glass header-left">
+      <div class="menu">
+        <h1>Polyfeed</h1>
+        <div class="subtitle">Live Polymarket trades from any wallet.</div>
+      </div>
+      <div class="controls">
+        <label for="wallet">Wallet</label>
+        <input id="wallet" placeholder="0x..." />
+        <button id="paste">Paste</button>
+      </div>
+    </header>
+
+    <main class="shell glass">
+      <div class="status" id="status">Updating every 1s…</div>
+      <div class="table-wrap">
+        <table id="trades">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Market</th>
+              <th>Outcome</th>
+              <th class="num">Price</th>
+              <th class="num">Size</th>
+              <th>Side</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </main>
+
+    <!-- Left side donation panel -->
+    <aside class="donation-side glass">
+      <div class="donation-side-title">Enjoying Polyfeed? Support the creator <strong>lagartija</strong></div>
+      <div class="donation-side-row">
+        <code id="addr">0xa9656833239dC09D0A5C2C3f26246440E2cFfCFC</code>
+        <button id="copy" class="copy-btn">Copy</button>
+      </div>
+    </aside>
+
+    <!-- Popular users panel (below donation) -->
+    <aside class="popular-side glass">
+      <div class="popular-title">Popular users</div>
+      <ul id="popular-list" class="popular-list"></ul>
+    </aside>
+
+    <!-- Crypto bots panel (below popular) -->
+    <aside class="crypto-side glass">
+      <div class="bots-title">Crypto bots</div>
+      <ul id="crypto-list" class="bots-list"></ul>
+    </aside>
+
+    <!-- Sports bots panel (below crypto) -->
+    <aside class="sports-side glass">
+      <div class="bots-title">Sports bots</div>
+      <ul id="sports-list" class="bots-list"></ul>
+    </aside>
+
+    <!-- Grain overlay -->
+    <div id="grainOverlay" class="pointer-events-none" style="position:fixed;inset:0;z-index:50;opacity:0.08;background-image:url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E&quot;);mix-blend-mode:overlay"></div>
+
+    
+
+    <script src="app.js"></script>
+  </body>
+ </html>
+
+
