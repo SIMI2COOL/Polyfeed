@@ -189,8 +189,8 @@ a:hover{ text-decoration: underline; }
 }
 
 
-/* Favorites right sidebar */
-.favorites-side{
+/* Favorites right sidebar: Add panel (fixed) */
+.fav-add-side{
   position: fixed;
   top: var(--gutter);
   right: calc(50% - min(50vw, calc(var(--shell-max) / 2)) - var(--gutter));
@@ -203,8 +203,6 @@ a:hover{ text-decoration: underline; }
   border-radius: 14px;
   width: clamp(240px, calc(50% - min(50vw, calc(var(--shell-max) / 2)) - 2 * var(--gutter)), 380px);
   max-width: 100%;
-  max-height: calc(100vh - 2 * var(--gutter));
-  overflow: auto;
 }
 .favorites-title{ font-size: 16px; line-height: 1.4; color: var(--fg); opacity: 0.95; }
 .favorites-form{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
@@ -212,6 +210,24 @@ a:hover{ text-decoration: underline; }
 .favorites-form #fav-name{ width: 120px; }
 .favorites-form #fav-address{ width: 180px; }
 .favorites-form button{ height: 36px; padding: 0 14px; border-radius: 999px; border: 0; background: linear-gradient(135deg, #2E5CFF, #6A8AFF); color:#0B0F19; font-weight: 600; cursor: pointer; box-shadow: 0 6px 16px rgba(46,92,255,0.35); }
+
+/* Favorites list (right, below add panel; positioned via JS like left stack) */
+.favorites-side{
+  position: absolute;
+  right: calc(50% - min(50vw, calc(var(--shell-max) / 2)) - var(--gutter));
+  transform: translateX(100%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  width: clamp(240px, calc(50% - min(50vw, calc(var(--shell-max) / 2)) - 2 * var(--gutter)), 380px);
+  max-width: 100%;
+  max-height: calc(100vh - 2 * var(--gutter));
+  overflow: auto;
+}
+.favorites-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
 .favorites-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
 .favorite-item{ position:relative; display:grid; grid-template-columns: var(--avatar) 1fr; grid-template-rows: auto auto; align-items:center; gap:10px; padding:8px 6px; border-radius:10px; background: rgba(255,255,255,0.06); border:1px solid var(--glass-border); }
 .favorite-avatar{ grid-column:1; grid-row:1 / span 3; width:var(--avatar); height:var(--avatar); min-width:var(--avatar); border-radius:50%; overflow:hidden; background: rgba(0,0,0,0.2); display:inline-flex; align-items:center; justify-content:center; }

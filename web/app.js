@@ -20,6 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const favAddress = document.getElementById('fav-address');
   const favList = document.getElementById('favorites-list');
   const favSaveCurrent = document.getElementById('fav-save-current');
+  const favAddAside = document.querySelector('.fav-add-side');
+  const favListAside = document.querySelector('.favorites-side');
 
   async function getTradesBrowser(walletAddr){
     if(!walletAddr || walletAddr === '0x...') return [];
@@ -190,6 +192,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function positionRightPanels(){
+    if(!favAddAside || !favListAside) return;
+    let top = window.scrollY + favAddAside.getBoundingClientRect().top + favAddAside.offsetHeight + 18;
+    favListAside.style.top = `${top}px`;
+  }
+
   function scrollToTop(){
     try{ window.scrollTo({ top: 0, behavior: 'smooth' }); }catch{ window.scrollTo(0,0); }
   }
@@ -207,6 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Reposition on resize
   window.addEventListener('resize', debounce(positionLeftPanels, 150));
+  window.addEventListener('resize', debounce(positionRightPanels, 150));
 
   loadPopular();
   // Populate Crypto bots
@@ -263,6 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
   attachAddrInteraction(cryptoList);
   attachAddrInteraction(sportsList);
   positionLeftPanels();
+  positionRightPanels();
 
   // ---------------- Favorites (right sidebar) ----------------
   const FAV_KEY = 'polyfeed:favorites';
