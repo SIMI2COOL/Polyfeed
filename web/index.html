@@ -23,6 +23,7 @@
         <label for="wallet">Wallet</label>
         <input id="wallet" placeholder="0x..." />
         <button id="paste">Paste</button>
+        <button id="fav-save-current" title="Add current wallet to favorites">Save</button>
       </div>
     </header>
 
@@ -47,7 +48,7 @@
 
     <!-- Left side donation panel -->
     <aside class="donation-side glass">
-      <div class="donation-side-title">Enjoying Polyfeed? Support the creator <strong>lagartija</strong></div>
+      <div class="donation-side-title">Enjoying Polyfeed? Support the creator <a href="https://polymarket.com/@lagartija" class="creator-link" target="_blank" rel="noopener noreferrer"><strong>lagartija</strong></a></div>
       <div class="donation-side-row">
         <code id="addr">0xa9656833239dC09D0A5C2C3f26246440E2cFfCFC</code>
         <button id="copy" class="copy-btn">Copy</button>
@@ -70,6 +71,17 @@
     <aside class="sports-side glass">
       <div class="bots-title">Sports bots</div>
       <ul id="sports-list" class="bots-list"></ul>
+    </aside>
+
+    <!-- Favorites right sidebar -->
+    <aside class="favorites-side glass">
+      <div class="favorites-title">Favorites</div>
+      <form id="favorites-form" class="favorites-form">
+        <input id="fav-name" placeholder="Name" />
+        <input id="fav-address" placeholder="0x..." />
+        <button type="submit">Add</button>
+      </form>
+      <ul id="favorites-list" class="favorites-list"></ul>
     </aside>
 
     <!-- Grain overlay -->

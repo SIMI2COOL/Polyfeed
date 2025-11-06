@@ -14,12 +14,38 @@ document.addEventListener('DOMContentLoaded', () => {
   const cryptoList = document.getElementById('crypto-list');
   const sportsAside = document.querySelector('.sports-side');
   const sportsList = document.getElementById('sports-list');
+  const creatorLink = document.querySelector('.creator-link');
+  const favForm = document.getElementById('favorites-form');
+  const favName = document.getElementById('fav-name');
+  const favAddress = document.getElementById('fav-address');
+  const favList = document.getElementById('favorites-list');
+  const favSaveCurrent = document.getElementById('fav-save-current');
+
+  async function getTradesBrowser(walletAddr){
+    if(!walletAddr || walletAddr === '0x...') return [];
+    const params = new URLSearchParams({
+      user: walletAddr,
+      type: 'TRADE',
+      limit: '20',
+      sortBy: 'TIMESTAMP',
+      sortDirection: 'DESC',
+    });
+    const url = `https://data-api.polymarket.com/activity?${params.toString()}`;
+    try{
+      const resp = await fetch(url, { headers: { 'accept': 'application/json' } });
+      if(!resp.ok) return [];
+      return await resp.json();
+    }catch(err){
+      console.error(err);
+      return [];
+    }
+  }
 
   async function refresh(){
     const w = wallet.value.trim();
     let trades = [];
     if(w && w !== '0x...'){
-      try{ trades = await pywebview.api.get_trades(w); }catch(e){ console.error(e); }
+      try{ trades = await getTradesBrowser(w); }catch(e){ console.error(e); }
     }
     render(trades);
   }
@@ -50,11 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // open market links in system browser via bridge
-  tbody.addEventListener('click', (e)=>{
-    const a = e.target.closest && e.target.closest('a.mkt');
-    if(a){ e.preventDefault(); const url = a.getAttribute('data-url'); if(url){ try{ pywebview.api.open_url(url); }catch{} } }
-  });
+  // links now use normal browser navigation via href/target
 
   const debounced = debounce(refresh, 300);
   wallet.addEventListener('input', debounced);
@@ -63,6 +85,8 @@ document.addEventListener('DOMContentLoaded', () => {
     catch{ statusEl.textContent = addrEl.textContent.trim(); }
   });
   pasteBtn.addEventListener('click', async ()=>{ try{ wallet.value = await navigator.clipboard.readText(); refresh(); }catch{} });
+
+  // creator link uses direct href in HTML
 
   setInterval(refresh, 1000);
 
@@ -85,16 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
       avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${u.address}`,
       url: `https://polymarket.com/@${u.handle || u.name}`,
     }));
-
-    try{
-      const users = await pywebview.api.get_popular_users();
-      const list = (Array.isArray(users) && users.length) ? users : fallback;
-      const withLocalAvatars = applyLocalAvatars(list);
-      renderPopular(withLocalAvatars);
-    }catch(e){
-      console.error(e);
-      renderPopular(applyLocalAvatars(fallback));
-    }
+    renderPopular(applyLocalAvatars(fallback));
     positionLeftPanels();
   }
 
@@ -121,9 +136,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const li = document.createElement('li');
       li.className = 'popular-item';
       li.innerHTML = `
-        <span class="popular-avatar"><a class="popular-link" href="#" data-url="${u.url}"><img alt="${u.name}" src="${u.avatar}"/></a></span>
+        <span class="popular-avatar"><a class="popular-link" href="${u.url}" target="_blank" rel="noopener noreferrer"><img alt="${u.name}" src="${u.avatar}"/></a></span>
         <span class="popular-meta">
-          <a class="popular-link" href="#" data-url="${u.url}"><span class="popular-name">${u.name}</span></a>
+          <a class="popular-link" href="${u.url}" target="_blank" rel="noopener noreferrer"><span class="popular-name">${u.name}</span></a>
           <span class="popular-addr" data-address="${u.address}">${u.address}</span>
         </span>`;
       popularList.appendChild(li);
@@ -179,17 +194,14 @@ document.addEventListener('DOMContentLoaded', () => {
     try{ window.scrollTo({ top: 0, behavior: 'smooth' }); }catch{ window.scrollTo(0,0); }
   }
 
-  // Interactions: set wallet on address click; open profile on avatar/name click
+  // Interaction: set wallet on address click
   if(popularList){
     popularList.addEventListener('click', (e)=>{
       const addrClick = e.target.closest && e.target.closest('.popular-addr');
       if(addrClick){
         const newAddr = addrClick.getAttribute('data-address');
         if(newAddr && wallet){ wallet.value = newAddr; scrollToTop(); refresh(); }
-        return;
       }
-      const a = e.target.closest && e.target.closest('a.popular-link');
-      if(a){ e.preventDefault(); const url = a.getAttribute('data-url'); if(url){ try{ pywebview.api.open_url(url); }catch{} } }
     });
   }
 
@@ -209,9 +221,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const li = document.createElement('li');
       li.className = 'bot-item';
       li.innerHTML = `
-        <span class="popular-avatar"><a class="popular-link" href="#" data-url="${u.url}"><img alt="${u.name}" src="${u.avatar}"/></a></span>
+        <span class="popular-avatar"><a class="popular-link" href="${u.url}" target="_blank" rel="noopener noreferrer"><img alt="${u.name}" src="${u.avatar}"/></a></span>
         <span class="popular-meta">
-          <a class="popular-link" href="#" data-url="${u.url}"><span class="popular-name">${u.name}</span></a>
+          <a class="popular-link" href="${u.url}" target="_blank" rel="noopener noreferrer"><span class="popular-name">${u.name}</span></a>
           <span class="popular-addr" data-address="${u.address}">${u.address}</span>
         </span>`;
       cryptoList.appendChild(li);
@@ -231,28 +243,195 @@ document.addEventListener('DOMContentLoaded', () => {
       const li = document.createElement('li');
       li.className = 'bot-item';
       li.innerHTML = `
-        <span class="popular-avatar"><a class="popular-link" href="#" data-url="${u.url}"><img alt="${u.name}" src="${u.avatar}"/></a></span>
+        <span class="popular-avatar"><a class="popular-link" href="${u.url}" target="_blank" rel="noopener noreferrer"><img alt="${u.name}" src="${u.avatar}"/></a></span>
         <span class="popular-meta">
-          <a class="popular-link" href="#" data-url="${u.url}"><span class="popular-name">${u.name}</span></a>
+          <a class="popular-link" href="${u.url}" target="_blank" rel="noopener noreferrer"><span class="popular-name">${u.name}</span></a>
           <span class="popular-addr" data-address="${u.address}">${u.address}</span>
         </span>`;
       sportsList.appendChild(li);
     }
   }
 
-  // Interactions for bot lists (same behavior as popular)
-  function attachListInteractions(listEl){
+  // Interactions for bot lists: allow address click to set wallet
+  function attachAddrInteraction(listEl){
     if(!listEl) return;
     listEl.addEventListener('click', (e)=>{
       const addrClick = e.target.closest && e.target.closest('.popular-addr');
-      if(addrClick){ const newAddr = addrClick.getAttribute('data-address'); if(newAddr && wallet){ wallet.value = newAddr; scrollToTop(); refresh(); } return; }
-      const a = e.target.closest && e.target.closest('a.popular-link');
-      if(a){ e.preventDefault(); const url = a.getAttribute('data-url'); if(url){ try{ pywebview.api.open_url(url); }catch{} } }
+      if(addrClick){ const newAddr = addrClick.getAttribute('data-address'); if(newAddr && wallet){ wallet.value = newAddr; scrollToTop(); refresh(); } }
     });
   }
-  attachListInteractions(cryptoList);
-  attachListInteractions(sportsList);
+  attachAddrInteraction(cryptoList);
+  attachAddrInteraction(sportsList);
   positionLeftPanels();
+
+  // ---------------- Favorites (right sidebar) ----------------
+  const FAV_KEY = 'polyfeed:favorites';
+  function loadFavorites(){
+    try{
+      const raw = localStorage.getItem(FAV_KEY);
+      const items = raw ? JSON.parse(raw) : [];
+      const dropper = '0x6bab41a0dc40d6dd4c1a915b8c01969479fd1292';
+      const filtered = Array.isArray(items)
+        ? items.filter(x => String(x.address || '').toLowerCase() !== dropper)
+        : [];
+      if(filtered.length !== (Array.isArray(items) ? items.length : 0)){
+        try{ localStorage.setItem(FAV_KEY, JSON.stringify(filtered)); }catch{}
+      }
+      return filtered;
+    }catch{ return []; }
+  }
+  function saveFavorites(items){
+    try{ localStorage.setItem(FAV_KEY, JSON.stringify(items)); }
+    catch{}
+  }
+  function normalizeAddr(a){ return (a || '').trim(); }
+  function normalizeHandle(h){
+    const raw = String(h || '').replace(/^@+/, '').trim();
+    if(!raw) return '';
+    // Do NOT treat hex addresses as handles
+    if(/^0x[0-9a-fA-F]{40}$/.test(raw)) return '';
+    // Accept typical handle chars only
+    if(!/^[A-Za-z0-9_]{1,32}$/.test(raw)) return '';
+    return raw;
+  }
+  function extractAddress(input){
+    const raw = String(input || '').trim();
+    if(!raw) return '';
+    const urlMatch = raw.match(/polymarket\.com\/(?:profile\/)?(0x[0-9a-fA-F]{40})/);
+    if(urlMatch) return urlMatch[1];
+    const hexMatch = raw.match(/^(0x[0-9a-fA-F]{40})$/);
+    if(hexMatch) return hexMatch[1];
+    return '';
+  }
+  async function resolveHandleFromAddress(address){
+    const addr = normalizeAddr(address);
+    if(!addr) return '';
+    try{
+      const resp = await fetch(`https://polymarket.com/${addr}`, { redirect: 'follow' });
+      const finalUrl = resp && resp.url ? resp.url : '';
+      const m = finalUrl.match(/\/@(\w+)/);
+      if(m && m[1]) return m[1];
+    }catch{}
+    return '';
+  }
+  async function resolveHandleAndUpdate(address){
+    const handle = await resolveHandleFromAddress(address);
+    if(!handle) return;
+    const items = loadFavorites();
+    const idx = items.findIndex(x => String(x.address).toLowerCase() === String(address).toLowerCase());
+    if(idx >= 0){
+      items[idx].handle = handle;
+      items[idx].name = `@${handle}`;
+      saveFavorites(items);
+      renderFavorites();
+    }
+  }
+  function addFavorite(name, address){
+    const addr = normalizeAddr(address);
+    if(!addr) return;
+    const items = loadFavorites();
+    const existingIdx = items.findIndex(x => String(x.address).toLowerCase() === addr.toLowerCase());
+    const handle = normalizeHandle(name);
+    const entry = handle
+      ? { name: handle, handle, address: addr }
+      : { name: (name || '').trim() || addr, address: addr };
+    if(existingIdx >= 0){ items[existingIdx] = entry; }
+    else { items.unshift(entry); }
+    saveFavorites(items);
+    renderFavorites();
+    // Attempt to auto-resolve @handle from address and update silently
+    resolveHandleAndUpdate(addr);
+  }
+  function removeFavorite(address){
+    const addr = normalizeAddr(address);
+    const items = loadFavorites().filter(x => String(x.address).toLowerCase() !== addr.toLowerCase());
+    saveFavorites(items);
+    renderFavorites();
+  }
+  function setWalletAndRefresh(addr){
+    if(wallet){ wallet.value = addr; scrollToTop(); refresh(); }
+  }
+  function renderFavorites(){
+    if(!favList) return;
+    const items = loadFavorites();
+    favList.innerHTML = '';
+    for(const f of items){
+      const li = document.createElement('li');
+      li.className = 'favorite-item';
+      const avatar = `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(f.address)}`;
+      const handle = f.handle || (String(f.name||'').startsWith('@') ? String(f.name).slice(1) : '');
+      const displayName = handle ? handle : ((f.name || '').replace(/^@+/, '') || f.address);
+      const profileUrl = handle ? `https://polymarket.com/@${handle}` : `https://polymarket.com/${f.address}`;
+      li.innerHTML = `
+        <span class="favorite-avatar"><img alt="${displayName}" src="${avatar}"/></span>
+        <span class="favorite-meta">
+          <a class="favorite-name-link" href="${profileUrl}" target="_blank" rel="noopener noreferrer"><span class="favorite-name">${displayName}</span></a>
+          <span class="favorite-addr-row">
+            <span class="favorite-addr" data-address="${f.address}">${f.address}</span>
+            <button class="fav-edit" data-address="${f.address}" aria-label="Edit name">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM18.37 3.29l2.34 2.34c.39.39.39 1.03 0 1.42L19.1 8.66l-3.75-3.75 1.62-1.62c.39-.39 1.03-.39 1.42 0z"/></svg>
+            </button>
+          </span>
+        </span>
+        <button class="fav-close fav-remove" data-address="${f.address}" aria-label="Remove favorite">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>`;
+      favList.appendChild(li);
+    }
+  }
+  if(favForm){
+    favForm.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const n = (favName && favName.value || '').trim();
+      const a = extractAddress((favAddress && favAddress.value) || '');
+      if(!a){ if(statusEl) statusEl.textContent = 'Enter an address to add to favorites'; return; }
+      addFavorite(n, a);
+      try{ if(favName) favName.value = ''; if(favAddress) favAddress.value = ''; }catch{}
+    });
+  }
+  if(favSaveCurrent){
+    favSaveCurrent.addEventListener('click', async ()=>{
+      const a = extractAddress(wallet && wallet.value);
+      if(!a){ if(statusEl) statusEl.textContent = 'Enter a valid wallet to save'; return; }
+      const handle = await resolveHandleFromAddress(a);
+      const nameForSave = handle ? handle : `${a.slice(0,6)}…${a.slice(-4)}`;
+      addFavorite(nameForSave, a);
+      if(statusEl) statusEl.textContent = 'Saved to favorites';
+    });
+  }
+  if(favList){
+    favList.addEventListener('click', (e)=>{
+      const editBtn = e.target.closest && e.target.closest('.fav-edit');
+      if(editBtn){
+        const addr = editBtn.getAttribute('data-address');
+        const items = loadFavorites();
+        const idx = items.findIndex(x => String(x.address).toLowerCase() === String(addr).toLowerCase());
+        if(idx >= 0){
+          const cur = items[idx].name || '';
+          let res = null;
+          try{ res = window.prompt('Edit name (@username or custom label)', cur.replace(/^@/, '')); }catch{}
+          if(res === null){ return; } // cancelled: keep previous value unchanged
+          const next = String(res);
+          const handle = normalizeHandle(next);
+          if(handle){ items[idx].handle = handle; items[idx].name = handle; }
+          else {
+            const trimmed = next.trim();
+            if(trimmed){ items[idx].handle = undefined; items[idx].name = trimmed; }
+            // if empty input, keep previous value
+          }
+          saveFavorites(items);
+          renderFavorites();
+        }
+        return;
+      }
+      const remBtn = e.target.closest && e.target.closest('.fav-remove');
+      if(remBtn){ const a = remBtn.getAttribute('data-address'); if(a){ removeFavorite(a); } return; }
+      const addrElFav = e.target.closest && e.target.closest('.favorite-addr');
+      const a = (addrElFav && addrElFav.getAttribute('data-address'));
+      if(a){ setWalletAndRefresh(a); }
+    });
+  }
+  renderFavorites();
 });
 
 
