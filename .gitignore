@@ -1,6 +1,7 @@
 ﻿/*
 !.gitignore
 !web/
+!vercel.json
 __pycache__/
 *.pyc
 .venv/
